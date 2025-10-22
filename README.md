@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Gestão da Biblioteca Comunitária "Ler é Viver"
 
-## Getting Started
+## Briefing
 
-First, run the development server:
+### Visão Geral do Projeto
+O projeto consiste no desenvolvimento de um **Sistema de Gestão de Biblioteca (SGB)** em formato de aplicação web, com o objetivo de digitalizar o controle de livros, membros e empréstimos, substituindo o uso de fichas de papel por um sistema seguro, eficiente e acessível.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Escopo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Objetivos
+- Automatizar o registro de empréstimos e devoluções
+- Identificar automaticamente livros com devolução atrasada
+- Permitir consulta pública ao acervo sem necessidade de login
+- Garantir segurança no acesso às funcionalidades administrativas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Público-Alvo
+- **Bibliotecário (Gestor)**: Gerencia livros, membros e empréstimos (CRUD completo)
+- **Membros da Comunidade**: Consultam o acervo online para verificar disponibilidade de livros
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Recursos Tecnológicos
+- **Frontend**: Next.js 14 (App Router), TypeScript, SCSS
+- **Backend**: API Routes do Next.js, JWT, Bcrypt
+- **Banco de Dados**: MongoDB Atlas + Mongoose (ODM)
+- **Autenticação**: JWT com cookies HTTP-only
+- **Ambiente**: Variáveis de ambiente (.env.local)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Diagramas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Diagrama de Classes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```mermaid
+classDiagram
+    class Livro {
+        +string titulo
+        +string autor
+        +string isbn
+        +string status
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
 
-## Deploy on Vercel
+    class Membro {
+        +string nome
+        +string email
+        +string telefone
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    class Emprestimo {
+        +Date dataEmprestimo
+        +Date dataDevolucaoPrevista
+        +Date dataDevolucaoReal
+        +string status
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    Livro "1" -- "0..*" Emprestimo : "emprestado em"
+    Membro "1" -- "0..*" Emprestimo : "realiza"
