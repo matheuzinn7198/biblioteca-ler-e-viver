@@ -1,7 +1,7 @@
 // lib/db.ts
 import mongoose from 'mongoose';
 
-const MongoUri = process.env.MONGODB_URI; // ← use o mesmo nome do .env.local
+const MongoUri = process.env.MONGODB_URI;
 
 if (!MongoUri) {
   throw new Error('Defina MONGODB_URI no .env.local');
@@ -10,7 +10,7 @@ if (!MongoUri) {
 let cached = (global as any).mongoose;
 
 if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null }; // ← "mongoose", não "moongose"
+  cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
 export default async function connectMongo() {
@@ -19,10 +19,7 @@ export default async function connectMongo() {
   }
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
+    const opts = { bufferCommands: false };
     cached.promise = mongoose.connect(MongoUri!, opts).then((mongoose) => {
       console.log('✅ Conexão estabelecida com MongoDB');
       return mongoose.connection;

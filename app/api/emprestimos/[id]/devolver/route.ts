@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import Emprestimo from '@/models/Emprestimo';
 import Livro from '@/models/Livro';
 import connectMongo from '@/lib/db';
+import { Types } from 'mongoose';
 
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
-  const emprestimo = await Emprestimo.findById(params.id).populate('livro');
+  const { id } = await params;
+
+  if (!Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+  }
+
+  const emprestimo = await Emprestimo.findById(id).populate('livro');
   if (!emprestimo) {
     return NextResponse.json({ error: 'Empréstimo não encontrado' }, { status: 404 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Membro from '@/models/Membro';
 import connectMongo from '@/lib/db';
+import { Types } from 'mongoose';
 
 export async function GET(
   req: NextRequest,
@@ -24,11 +25,20 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
-  const membro = await Membro.findByIdAndDelete(params.id);
-  if (!membro) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 });
+  const { id } = await params;
+
+  if (!Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+  }
+
+  const membro = await Membro.findByIdAndDelete(id);
+  if (!membro) {
+    return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
+  }
+
   return NextResponse.json({ success: true });
 }

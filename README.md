@@ -172,26 +172,28 @@ classDiagram
 ### Diagrama de Casos de Uso
 
 ```mermaid
-usecaseDiagram
-    actor Bibliotecario as B
-    actor Membro as M
+flowchart LR
+    %% Atores
+    B([Bibliotecário])
+    M([Membro])
 
-    rectangle Sistema {
-        usecase "Cadastrar Livro" as UC1
-        usecase "Editar Livro" as UC2
-        usecase "Excluir Livro" as UC3
-        usecase "Listar Livros" as UC4
-        usecase "Cadastrar Membro" as UC5
-        usecase "Editar Membro" as UC6
-        usecase "Excluir Membro" as UC7
-        usecase "Registrar Empréstimo" as UC8
-        usecase "Registrar Devolução" as UC9
-        usecase "Listar Empréstimos Atrasados" as UC10
-        usecase "Buscar Livro (Título/Autor)" as UC11
-        usecase "Consultar Disponibilidade de Livro" as UC12
-    }
+    subgraph Sistema ["Sistema"]
+        direction TB
+        UC1["Cadastrar Livro"]
+        UC2["Editar Livro"]
+        UC3["Excluir Livro"]
+        UC4["Listar / Consultar Livros"]
+        UC5["Cadastrar Membro"]
+        UC6["Editar Membro"]
+        UC7["Excluir Membro"]
+        UC8["Registrar Empréstimo"]
+        UC9["Registrar Devolução"]
+        UC10["Listar Empréstimos Atrasados"]
+        UC11["Buscar Livro (Título/Autor)"]
+        UC12["Consultar Disponibilidade"]
+    end
 
-    %% RELAÇÕES
+    %% Conexões ator -> casos
     B --> UC1
     B --> UC2
     B --> UC3
@@ -215,24 +217,23 @@ usecaseDiagram
 
 ```mermaid
 flowchart TD
-    A[Início] --> B{Bibliotecário seleciona opção de empréstimo}
-    B --> C[Seleciona Livro]
-    C --> D{Livro está disponível?}
-    D -- Não --> E[Exibir mensagem: Livro já emprestado] --> C
-    D -- Sim --> F[Seleciona Membro]
-    F --> G[Registra dados do Empréstimo (datas, membro, livro)]
-    G --> H[Atualiza status do livro para "Emprestado"]
-    H --> I[Salva registro do empréstimo no sistema]
-    I --> J[Empréstimo concluído]
+    Start([Início]) --> Escolha{Bibliotecário inicia empréstimo?}
+    Escolha -- Sim --> SelecionaLivro[Seleciona Livro]
+    SelecionaLivro --> Disponivel{Livro disponível?}
+    Disponivel -- Não --> MsgLivroEmprestado[Exibir: Livro emprestado] --> SelecionaLivro
+    Disponivel -- Sim --> SelecionaMembro[Seleciona Membro]
+    SelecionaMembro --> RegistrarEmprestimo[Registrar empréstimo]
+    RegistrarEmprestimo --> AtualizaStatus[Atualiza status para Emprestado]
+    AtualizaStatus --> SalvaDB[Salvar no banco de dados]
+    SalvaDB --> EmprestimoConcluido[Empréstimo concluído]
 
-    J --> K{Livro devolvido?}
-    K -- Não --> Z[Fim]
-    K -- Sim --> L[Registrar data de devolução]
-    L --> M[Atualiza status do livro para "Disponível"]
-    M --> N[Verifica se devolução está atrasada]
-    N --> O{Atrasado?}
-    O -- Sim --> P[Marca empréstimo como "Atrasado"]
-    O -- Não --> Q[Finaliza registro]
-    P --> Q
-    Q --> Z[Fim]
+    EmprestimoConcluido --> VerificaDevolucao{Devolução registrada?}
+    VerificaDevolucao -- Não --> Fim([Fim])
+    VerificaDevolucao -- Sim --> RegistrarDevolucao[Registrar data de devolução]
+    RegistrarDevolucao --> AtualizaStatusDisp[Atualiza status para Disponível]
+    AtualizaStatusDisp --> VerificaAtraso[Verifica atraso]
+    VerificaAtraso --> Atrasado{Atrasado?}
+    Atrasado -- Sim --> MarcaAtrasado[Marcar como Atrasado] --> Finaliza
+    Atrasado -- Não --> Finaliza[Finalizar registro]
+    Finaliza --> Fim
 ```
