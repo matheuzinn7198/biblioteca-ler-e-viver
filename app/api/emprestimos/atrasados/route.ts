@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import Emprestimo from '@/models/Emprestimo';
-import { connectDB } from '@/lib/db';
+import connectMongo from '@/lib/db';
 
 export async function GET() {
-  await connectDB();
+  await connectMongo();
   const hoje = new Date();
   const atrasados = await Emprestimo.find({
     status: 'Ativo',

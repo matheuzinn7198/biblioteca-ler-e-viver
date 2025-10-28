@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Emprestimo from '@/models/Emprestimo';
 import Livro from '@/models/Livro';
-import { connectDB } from '@/lib/db';
+import connectMongo from '@/lib/db';
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await connectDB();
+  await connectMongo();
   const emprestimo = await Emprestimo.findById(params.id).populate('livro');
   if (!emprestimo) {
     return NextResponse.json({ error: 'Empréstimo não encontrado' }, { status: 404 });

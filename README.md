@@ -1,68 +1,115 @@
-# Sistema de Gestão da Biblioteca Comunitária "Ler é Viver"
-
-## Briefing
-
-### Visão Geral do Projeto
-O projeto consiste no desenvolvimento de um **Sistema de Gestão de Biblioteca (SGB)** em formato de aplicação web, com o objetivo de digitalizar o controle de livros, membros e empréstimos, substituindo o uso de fichas de papel por um sistema seguro, eficiente e acessível.
-
-## Escopo
-
-### Objetivos
-- Automatizar o registro de empréstimos e devoluções
-- Identificar automaticamente livros com devolução atrasada
-- Permitir consulta pública ao acervo sem necessidade de login
-- Garantir segurança no acesso às funcionalidades administrativas
-
-### Público-Alvo
-- **Bibliotecário (Gestor)**: Gerencia livros, membros e empréstimos (CRUD completo)
-- **Membros da Comunidade**: Consultam o acervo online para verificar disponibilidade de livros
-
-### Recursos Tecnológicos
-- **Frontend**: Next.js 14 (App Router), TypeScript, SCSS
-- **Backend**: API Routes do Next.js, JWT, Bcrypt
-- **Banco de Dados**: MongoDB Atlas + Mongoose (ODM)
-- **Autenticação**: JWT com cookies HTTP-only
-- **Ambiente**: Variáveis de ambiente (.env.local)
-
+%% =========================
+%% DIAGRAMA DE CASOS DE USO
+%% =========================
 ---
+title: Sistema de Gerenciamento de Biblioteca - Casos de Uso
+---
+usecaseDiagram
+    actor Bibliotecario as B
+    actor Membro as M
 
-## Diagramas
+    rectangle Sistema {
+        usecase "Cadastrar Livro" as UC1
+        usecase "Editar Livro" as UC2
+        usecase "Excluir Livro" as UC3
+        usecase "Listar Livros" as UC4
+        usecase "Cadastrar Membro" as UC5
+        usecase "Editar Membro" as UC6
+        usecase "Excluir Membro" as UC7
+        usecase "Registrar Empréstimo" as UC8
+        usecase "Registrar Devolução" as UC9
+        usecase "Listar Empréstimos Atrasados" as UC10
+        usecase "Buscar Livro por Título ou Autor" as UC11
+        usecase "Consultar Disponibilidade de Livro" as UC12
+    }
 
-### Diagrama de Classes
+    %% Relações
+    B --> UC1
+    B --> UC2
+    B --> UC3
+    B --> UC4
+    B --> UC5
+    B --> UC6
+    B --> UC7
+    B --> UC8
+    B --> UC9
+    B --> UC10
+    B --> UC11
 
-```mermaid
+    M --> UC4
+    M --> UC11
+    M --> UC12
+%% =========================
+%% DIAGRAMA DE CLASSES
+%% =========================
+---
+title: Diagrama de Classes - Sistema de Biblioteca
+---
 classDiagram
     class Livro {
-        +string titulo
-        +string autor
-        +string isbn
-        +string status
-        +create()
-        +read()
-        +update()
-        +delete()
+        - String titulo
+        - String autor
+        - String ISBN
+        - String status  // Disponível | Emprestado
+        + emprestar()
+        + devolver()
     }
 
     class Membro {
-        +string nome
-        +string email
-        +string telefone
-        +create()
-        +read()
-        +update()
-        +delete()
+        - int id
+        - String nome
+        - String email
+        - String telefone
+        + consultarAcervo()
     }
 
     class Emprestimo {
-        +Date dataEmprestimo
-        +Date dataDevolucaoPrevista
-        +Date dataDevolucaoReal
-        +string status
-        +create()
-        +read()
-        +update()
-        +delete()
+        - int id
+        - Date dataEmprestimo
+        - Date dataPrevistaDevolucao
+        - Date? dataDevolucao
+        + registrar()
+        + devolver()
+        + verificarAtraso()
     }
 
-    Livro "1" -- "0..*" Emprestimo : "emprestado em"
-    Membro "1" -- "0..*" Emprestimo : "realiza"
+    class Biblioteca {
+        + List<Livro> livros
+        + List<Membro> membros
+        + List<Emprestimo> emprestimos
+        + adicionarLivro()
+        + removerLivro()
+        + buscarLivro()
+        + listarAtrasados()
+    }
+
+    %% RELACIONAMENTOS
+    Biblioteca "1" --> "many" Livro
+    Biblioteca "1" --> "many" Membro
+    Biblioteca "1" --> "many" Emprestimo
+    Emprestimo "1" --> "1" Livro
+    Emprestimo "1" --> "1" Membro
+%% =========================
+%% DIAGRAMA DE FLUXO (PROCESSO)
+%% =========================
+---
+title: Fluxo de Empréstimo e Devolução
+---
+flowchart TD
+    A[Início] --> B{Bibliotecário autenticado?}
+    B -- Não --> X[Fim]
+    B -- Sim --> C[Seleciona Livro no sistema]
+    C --> D{Livro disponível?}
+    D -- Não --> E[Informar: Livro já emprestado]
+    E --> C
+    D -- Sim --> F[Seleciona Membro]
+    F --> G[Registra Empréstimo com data prevista de devolução]
+    G --> H[Atualiza status do livro para "Emprestado"]
+    H --> I[Empréstimo Concluído]
+    I --> J{Devolução?}
+    J -- Sim --> K[Registrar Devolução]
+    K --> L[Atualiza status do livro para "Disponível"]
+    L --> M[Verifica se devolução está atrasada]
+    M --> N[Listar em "Empréstimos Atrasados" se necessário]
+    N --> X[Fim]
+    J -- Não --> X[Fim]

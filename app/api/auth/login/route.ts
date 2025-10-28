@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 // 🔑 Credenciais fixas do bibliotecário
 const ADMIN_EMAIL = 'admin@ler.com';
-const ADMIN_PASSWORD_HASH = '$2a$10$X8xKvJ3qZ9W1mN2oP4rQ5eT6uV7wX8yZ9aB0cD1eF2gH3iJ4kL5m'; // senha123
+const ADMIN_PASSWORD_HASH = '$2b$10$d4Ahsce.ML1C7vbfcxBZwesbjW55gE1QvuY0OCG9VHM352gv4PLc2'; // senha123
 
 export async function POST(req: NextRequest) {
   // 🔒 Verifica se as variáveis de ambiente essenciais estão definidas
