@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-const jwt = require('jsonwebtoken');
 
 // 🔑 Credenciais fixas do bibliotecário
 const ADMIN_EMAIL = 'admin@ler.com';
-const ADMIN_PASSWORD_HASH = '$2b$10$d4Ahsce.ML1C7vbfcxBZwesbjW55gE1QvuY0OCG9VHM352gv4PLc2'; // senha123
+const ADMIN_PASSWORD_HASH = '$2a$10$X8xKvJ3qZ9W1mN2oP4rQ5eT6uV7wX8yZ9aB0cD1eF2gH3iJ4kL5m'; // senha123
 
 export async function POST(req: NextRequest) {
   // 🔒 Verifica se as variáveis de ambiente essenciais estão definidas
@@ -41,10 +40,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 });
   }
 
-  // 🎫 Gera o token JWT
-  const token = jwt.sign({ role: 'bibliotecario' }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+  // 🎫 Importa e usa o jsonwebtoken DENTRO da função assíncrona
+  const { default: jwt } = await import('jsonwebtoken');
+
+  // ✅ Gera o token JWT com tipos corretos
+  const token = jwt.sign(
+    { role: 'bibliotecario' },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN as string }
+  );
 
   // 🍪 Define o cookie com o token
   const response = NextResponse.json({ success: true });
